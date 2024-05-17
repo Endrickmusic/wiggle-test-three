@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { WiggleBone } from "./wiggle.js"
+import { WiggleBone } from "./wiggle.js/index.js"
 
 import "./style.css"
 // Create a scene
@@ -19,37 +19,42 @@ document.body.appendChild(renderer.domElement);
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const loader = new GLTFLoader();
+const loader = new GLTFLoader()
 
 loader.load("./models/stick.glb", ({ scene: modelScene }) => {
   console.log(modelScene)
-  const mesh = modelScene.getObjectByName("StickRig")
-  let rootBone;
+  const mesh = modelScene.getObjectByName("Stick")
+  let rootBone
   const wiggleBones = []
 
-  modelScene.children.forEach((bone) => {
+  mesh.skeleton.bones.forEach((bone) => {
     if (!bone.parent.isBone) {
       rootBone = bone;
     } else {
-      const wiggleBone = WiggleBone(bone, {
+      const wiggleBone = new WiggleBone(bone, {
         velocity: 0.5,
       });
       wiggleBones.push(wiggleBone);
     }
   })
 
+  console.log(rootBone)
+  console.log(wiggleBones)
+
   // Add the model scene to the main scene
-  scene.add(modelScene);
-  
+  scene.add(modelScene)
+
+  scene.add(mesh.skeleton.bones[1])
+
   // Create a directional light
   const light = new THREE.DirectionalLight(0xffffff, 0.5);
-  light.position.set(1, 1, 1);
+  light.position.set(1, 1, 1)
 
   // Add the light to the scene
   scene.add(light);
 
   const tick = (ms) => {
-    rootBone.position.x = Math.sin(ms/1000)
+    rootBone.position.x = Math.sin(ms/500)
     wiggleBones.forEach((wiggleBone) => {
       wiggleBone.update()
     })
@@ -59,7 +64,7 @@ loader.load("./models/stick.glb", ({ scene: modelScene }) => {
     renderer.render(scene, camera);
 
     requestAnimationFrame(tick);
-  };
+  }
 
-  tick();
-});
+  tick()
+})
